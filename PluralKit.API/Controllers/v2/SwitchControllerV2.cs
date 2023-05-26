@@ -39,7 +39,7 @@ public class SwitchControllerV2: PKControllerBase
 
         var res = await _db.Execute(conn => conn.QueryAsync<SwitchesReturnNew>(
             @"select *, array(
-                    select members.hid from switch_members, members
+                    select trim(members.hid) from switch_members, members
                     where switch_members.switch = switches.id and members.id = switch_members.member
                 ) as members from switches
                 where switches.system = @System and switches.timestamp < @Before
@@ -110,8 +110,8 @@ public class SwitchControllerV2: PKControllerBase
             var latestSwitchMembers = _db.Execute(conn => _repo.GetSwitchMembers(conn, latestSwitch.Id));
 
             // Bail if this switch is identical to the latest one
-            if (await latestSwitchMembers.Select(m => m.Hid)
-                    .SequenceEqualAsync(members.Select(m => m.Hid).ToAsyncEnumerable()))
+            if (await latestSwitchMembers.Select(m => m.Id)
+                    .SequenceEqualAsync(members.Select(m => m.Id).ToAsyncEnumerable()))
                 throw Errors.SameSwitchMembersError;
         }
 
@@ -229,8 +229,8 @@ public class SwitchControllerV2: PKControllerBase
 
         var latestSwitchMembers = _db.Execute(conn => _repo.GetSwitchMembers(conn, sw.Id));
 
-        if (await latestSwitchMembers.Select(m => m.Hid)
-                .SequenceEqualAsync(members.Select(m => m.Hid).ToAsyncEnumerable()))
+        if (await latestSwitchMembers.Select(m => m.Id)
+                .SequenceEqualAsync(members.Select(m => m.Id).ToAsyncEnumerable()))
             throw Errors.SameSwitchMembersError;
 
         await _db.Execute(conn => _repo.EditSwitch(conn, sw.Id, members.Select(x => x.Id).ToList()));

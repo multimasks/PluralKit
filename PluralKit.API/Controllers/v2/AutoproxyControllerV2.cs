@@ -46,7 +46,7 @@ public class AutoproxyControllerV2: PKControllerBase
     {
         string hid = null;
         if (settings.AutoproxyMember != null)
-            hid = (await _repo.GetMember(settings.AutoproxyMember.Value))?.Hid;
+            hid = (await _repo.GetMember(settings.AutoproxyMember.Value))?.Hid.Trim();
 
         return Ok(settings.ToJson(hid));
     }
@@ -79,6 +79,6 @@ public class AutoproxyControllerV2: PKControllerBase
         var res = await _repo.UpdateAutoproxy(system.Id, guildId, channelId, patch);
         if (!updateMember && oldData.AutoproxyMember != null)
             member = await _repo.GetMember(oldData.AutoproxyMember.Value);
-        return Ok(res.ToJson(member?.Hid));
+        return Ok(res.ToJson(member?.Hid.Trim()));
     }
 }

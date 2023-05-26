@@ -72,7 +72,7 @@ public static class PKGroupExt
     {
         var o = new JObject();
 
-        o.Add("id", group.Hid);
+        o.Add("id", group.Hid.Trim());
         o.Add("uuid", group.Uuid.ToString());
         o.Add("name", group.NameFor(ctx));
 

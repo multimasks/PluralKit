@@ -121,7 +121,7 @@ public static class Errors
         new($"The given URL is too long ({url.Length}/{Limits.MaxUriLength} characters).");
 
     public static PKError AccountInOtherSystem(PKSystem system) =>
-        new($"The mentioned account is already linked to another system (see `pk;system {system.Hid}`).");
+        new($"The mentioned account is already linked to another system (see `pk;system {system.DisplayHid()}`).");
 
     public static PKError SameSwitch(ICollection<PKMember> members, LookupContext ctx)
     {

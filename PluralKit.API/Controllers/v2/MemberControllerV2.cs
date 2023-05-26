@@ -76,7 +76,7 @@ public class MemberControllerV2: PKControllerBase
 
         var system = await _repo.GetSystem(member.System);
 
-        return Ok(member.ToJson(ContextFor(member), systemStr: system.Hid));
+        return Ok(member.ToJson(ContextFor(member), systemStr: system.Hid.Trim()));
     }
 
     [HttpGet("members/{memberRef}/oembed.json")]

@@ -71,9 +71,9 @@ public class EmbedService
             .Title(system.Name)
             .Thumbnail(new Embed.EmbedThumbnail(system.AvatarUrl.TryGetCleanCdnUrl()))
             .Footer(new Embed.EmbedFooter(
-                $"System ID: {system.Hid} | Created on {system.Created.FormatZoned(cctx.Zone)}"))
+                $"System ID: {system.DisplayHid(cctx.Config)} | Created on {system.Created.FormatZoned(cctx.Zone)}"))
             .Color(color)
-            .Url($"https://dash.pluralkit.me/profile/s/{system.Hid}");
+            .Url($"https://dash.pluralkit.me/profile/s/{system.Hid.Trim()}");
 
         if (system.DescriptionPrivacy.CanAccess(ctx))
             eb.Image(new Embed.EmbedImage(system.BannerImage));
@@ -87,7 +87,7 @@ public class EmbedService
             {
                 var memberStr = string.Join(", ", switchMembers.Select(m => m.NameFor(ctx)));
                 if (memberStr.Length > 200)
-                    memberStr = $"[too many to show, see `pk;system {system.Hid} fronters`]";
+                    memberStr = $"[too many to show, see `pk;system {system.DisplayHid(cctx.Config)} fronters`]";
                 eb.Field(new Embed.Field("Fronter".ToQuantity(switchMembers.Count, ShowQuantityAs.None), memberStr));
             }
         }
@@ -119,7 +119,7 @@ public class EmbedService
         {
             if (memberCount > 0)
                 eb.Field(new Embed.Field($"Members ({memberCount})",
-                    $"(see `pk;system {system.Hid} list` or `pk;system {system.Hid} list full`)", true));
+                    $"(see `pk;system {system.DisplayHid(cctx.Config)} list` or `pk;system {system.DisplayHid(cctx.Config)} list full`)", true));
             else
                 eb.Field(new Embed.Field($"Members ({memberCount})", "Add one with `pk;member new`!", true));
         }
@@ -145,7 +145,7 @@ public class EmbedService
             .Thumbnail(new Embed.EmbedThumbnail(avatar))
             .Description(proxiedMessage.Content?.NormalizeLineEndSpacing())
             .Footer(new Embed.EmbedFooter(
-                $"System ID: {systemHid} | Member ID: {member.Hid} | Sender: {triggerMessage.Author.Username}#{triggerMessage.Author.Discriminator} ({triggerMessage.Author.Id}) | Message ID: {proxiedMessage.Id} | Original Message ID: {triggerMessage.Id}"))
+                $"System ID: {systemHid} | Member ID: {member.DisplayHid()} | Sender: {triggerMessage.Author.Username}#{triggerMessage.Author.Discriminator} ({triggerMessage.Author.Id}) | Message ID: {proxiedMessage.Id} | Original Message ID: {triggerMessage.Id}"))
             .Timestamp(timestamp.ToDateTimeOffset().ToString("O"));
 
         if (oldContent == "")
@@ -157,7 +157,7 @@ public class EmbedService
         return embed.Build();
     }
 
-    public async Task<Embed> CreateMemberEmbed(PKSystem system, PKMember member, Guild guild, LookupContext ctx, DateTimeZone zone)
+    public async Task<Embed> CreateMemberEmbed(PKSystem system, PKMember member, Guild guild, LookupContext ctx, SystemConfig? ccfg, DateTimeZone zone)
     {
         // string FormatTimestamp(Instant timestamp) => DateTimeFormats.ZonedDateTimeFormat.Format(timestamp.InZone(system.Zone));
 
@@ -188,11 +188,11 @@ public class EmbedService
             .ToListAsync();
 
         var eb = new EmbedBuilder()
-            .Author(new Embed.EmbedAuthor(name, IconUrl: webhook_avatar.TryGetCleanCdnUrl(), Url: $"https://dash.pluralkit.me/profile/m/{member.Hid}"))
+            .Author(new Embed.EmbedAuthor(name, IconUrl: webhook_avatar.TryGetCleanCdnUrl(), Url: $"https://dash.pluralkit.me/profile/m/{member.Hid.Trim()}"))
             // .WithColor(member.ColorPrivacy.CanAccess(ctx) ? color : DiscordUtils.Gray)
             .Color(color)
             .Footer(new Embed.EmbedFooter(
-                $"System ID: {system.Hid} | Member ID: {member.Hid} {(member.MetadataPrivacy.CanAccess(ctx) ? $"| Created on {member.Created.FormatZoned(zone)}" : "")}"));
+                $"System ID: {system.DisplayHid(ccfg)} | Member ID: {member.DisplayHid(ccfg)} {(member.MetadataPrivacy.CanAccess(ctx) ? $"| Created on {member.Created.FormatZoned(zone)}" : "")}"));
 
         if (member.DescriptionPrivacy.CanAccess(ctx))
             eb.Image(new Embed.EmbedImage(member.BannerImage));
@@ -231,7 +231,7 @@ public class EmbedService
             // More than 5 groups show in "compact" format without ID
             var content = groups.Count > 5
                 ? string.Join(", ", groups.Select(g => g.DisplayName ?? g.Name))
-                : string.Join("\n", groups.Select(g => $"[`{g.Hid}`] **{g.DisplayName ?? g.Name}**"));
+                : string.Join("\n", groups.Select(g => $"[`{g.DisplayHid(ccfg)}`] **{g.DisplayName ?? g.Name}**"));
             eb.Field(new Embed.Field($"Groups ({groups.Count})", content.Truncate(1000)));
         }
 
@@ -272,10 +272,10 @@ public class EmbedService
         }
 
         var eb = new EmbedBuilder()
-            .Author(new Embed.EmbedAuthor(nameField, IconUrl: target.IconFor(pctx), Url: $"https://dash.pluralkit.me/profile/g/{target.Hid}"))
+            .Author(new Embed.EmbedAuthor(nameField, IconUrl: target.IconFor(pctx), Url: $"https://dash.pluralkit.me/profile/g/{target.Hid.Trim()}"))
             .Color(color);
 
-        eb.Footer(new Embed.EmbedFooter($"System ID: {system.Hid} | Group ID: {target.Hid}{(target.MetadataPrivacy.CanAccess(pctx) ? $" | Created on {target.Created.FormatZoned(ctx.Zone)}" : "")}"));
+        eb.Footer(new Embed.EmbedFooter($"System ID: {system.DisplayHid(ctx.Config)} | Group ID: {target.DisplayHid(ctx.Config)}{(target.MetadataPrivacy.CanAccess(pctx) ? $" | Created on {target.Created.FormatZoned(ctx.Zone)}" : "")}"));
 
         if (target.DescriptionPrivacy.CanAccess(pctx))
             eb.Image(new Embed.EmbedImage(target.BannerImage));
@@ -295,7 +295,7 @@ public class EmbedService
             {
                 var name = pctx == LookupContext.ByOwner
                     ? target.Reference(ctx)
-                    : target.Hid;
+                    : target.DisplayHid(ctx.Config);
                 eb.Field(new Embed.Field($"Members ({memberCount})", $"(see `pk;group {name} list`)"));
             }
         }
@@ -395,12 +395,12 @@ public class EmbedService
             .Field(new Embed.Field("System",
                 msg.System == null
                     ? "*(deleted or unknown system)*"
-                    : msg.System.Name != null ? $"{msg.System.Name} (`{msg.System.Hid}`)" : $"`{msg.System.Hid}`"
+                    : msg.System.Name != null ? $"{msg.System.Name} (`{msg.System.DisplayHid()}`)" : $"`{msg.System.DisplayHid()}`"
             , true))
             .Field(new Embed.Field("Member",
                 msg.Member == null
                     ? "*(deleted member)*"
-                    : $"{msg.Member.NameFor(ctx)} (`{msg.Member.Hid}`)"
+                    : $"{msg.Member.NameFor(ctx)} (`{msg.Member.DisplayHid()}`)"
             , true))
             .Field(new Embed.Field("Sent by", userStr, true))
             .Timestamp(DiscordUtils.SnowflakeToInstant(msg.Message.Mid).ToDateTimeOffset().ToString("O"));

@@ -102,6 +102,13 @@ public class Config
             "enabled"
         ));
 
+        items.Add(new(
+            "Split IDs",
+            "Whether to display 6-character IDs with a hyphen in the middle, to ease readability.",
+            EnabledDisabled(ctx.Config.HidDisplaySplitSix),
+            "disabled"
+        ));
+
         await ctx.Paginate<PaginatedConfigItem>(
             items.ToAsyncEnumerable(),
             items.Count,
@@ -441,6 +448,29 @@ public class Config
             await ctx.Repository.UpdateSystemConfig(ctx.System.Id, new() { ProxyErrorMessageEnabled = false });
 
             await ctx.Reply("Proxy error messages are now disabled. Messages that fail to proxy (due to message or attachment size) will not throw an error message.");
+        }
+    }
+
+    public async Task HidSplitSixCharacters(Context ctx)
+    {
+        if (!ctx.HasNext())
+        {
+            var display = $"Splitting of 6-character IDs with a hyphen is currently **{EnabledDisabled(ctx.Config.HidDisplaySplitSix)}**.";
+            await ctx.Reply(display);
+            return;
+        }
+
+        if (ctx.MatchToggle(true))
+        {
+            await ctx.Repository.UpdateSystemConfig(ctx.System.Id, new() { HidDisplaySplitSix = true });
+
+            await ctx.Reply("Splitting of 6-character IDs with a hyphen is now enabled.");
+        }
+        else
+        {
+            await ctx.Repository.UpdateSystemConfig(ctx.System.Id, new() { HidDisplaySplitSix = false });
+
+            await ctx.Reply("Splitting of 6-character IDs with a hyphen is now disabled.");
         }
     }
 }

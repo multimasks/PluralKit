@@ -38,7 +38,7 @@ public class Member
         var existingMember = await ctx.Repository.GetMemberByName(ctx.System.Id, memberName);
         if (existingMember != null)
         {
-            var msg = $"{Emojis.Warn} You already have a member in your system with the name \"{existingMember.NameFor(ctx)}\" (with ID `{existingMember.Hid}`). Do you want to create another member with the same name?";
+            var msg = $"{Emojis.Warn} You already have a member in your system with the name \"{existingMember.NameFor(ctx)}\" (with ID `{existingMember.DisplayHid(ctx.Config)}`). Do you want to create another member with the same name?";
             if (!await ctx.PromptYesNo(msg, "Create")) throw new PKError("Member creation cancelled.");
         }
 
@@ -88,12 +88,12 @@ public class Member
 
         // Send confirmation and space hint
         await ctx.Reply(
-            $"{Emojis.Success} Member \"{memberName}\" (`{member.Hid}`) registered! Check out the getting started page for how to get a member up and running: https://pluralkit.me/start#create-a-member");
+            $"{Emojis.Success} Member \"{memberName}\" (`{member.DisplayHid(ctx.Config)}`) registered! Check out the getting started page for how to get a member up and running: https://pluralkit.me/start#create-a-member");
         // todo: move this to ModelRepository
         if (await ctx.Database.Execute(conn => conn.QuerySingleAsync<bool>("select has_private_members(@System)",
                 new { System = ctx.System.Id })) && !ctx.Config.MemberDefaultPrivate) //if has private members
             await ctx.Reply(
-                $"{Emojis.Warn} This member is currently **public**. To change this, use `pk;member {member.Hid} private`.");
+                $"{Emojis.Warn} This member is currently **public**. To change this, use `pk;member {member.DisplayHid(ctx.Config)} private`.");
         if (avatarArg != null)
             if (imageMatchError == null)
                 await ctx.Reply(
@@ -102,7 +102,7 @@ public class Member
                 await ctx.Reply($"{Emojis.Error} Couldn't set avatar: {imageMatchError.Message}");
         if (memberName.Contains(" "))
             await ctx.Reply(
-                $"{Emojis.Note} Note that this member's name contains spaces. You will need to surround it with \"double quotes\" when using commands referring to it, or just use the member's 5-character ID (which is `{member.Hid}`).");
+                $"{Emojis.Note} Note that this member's name contains spaces. You will need to surround it with \"double quotes\" when using commands referring to it, or just use the member's ID (which is `{member.DisplayHid(ctx.Config)}`).");
         if (memberCount >= memberLimit)
             await ctx.Reply(
                 $"{Emojis.Warn} You have reached the per-system member limit ({memberLimit}). You will be unable to create additional members until existing members are deleted.");
@@ -115,7 +115,7 @@ public class Member
     {
         var system = await ctx.Repository.GetSystem(target.System);
         await ctx.Reply(
-            embed: await _embeds.CreateMemberEmbed(system, target, ctx.Guild, ctx.LookupContextFor(system.Id), ctx.Zone));
+            embed: await _embeds.CreateMemberEmbed(system, target, ctx.Guild, ctx.LookupContextFor(system.Id), ctx.Config, ctx.Zone));
     }
 
     public async Task Soulscream(Context ctx, PKMember target)
@@ -143,6 +143,6 @@ public class Member
 
     public async Task DisplayId(Context ctx, PKMember target)
     {
-        await ctx.Reply(target.Hid);
+        await ctx.Reply(target.DisplayHid(ctx.Config));
     }
 }

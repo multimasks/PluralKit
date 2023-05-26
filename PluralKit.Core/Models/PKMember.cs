@@ -118,7 +118,7 @@ public static class PKMemberExt
         var includePrivacy = ctx == LookupContext.ByOwner;
 
         var o = new JObject();
-        o.Add("id", member.Hid);
+        o.Add("id", member.Hid.Trim());
 
         o.Add("uuid", member.Uuid.ToString());
         if (systemStr != null)

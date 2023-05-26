@@ -10,6 +10,8 @@ namespace PluralKit.Bot;
 
 public static class ContextEntityArgumentsExt
 {
+    private static readonly Regex _shortIdRegex = new(@"^[a-zA-Z]{5,6}$");
+
     public static async Task<User> MatchUser(this Context ctx)
     {
         var text = ctx.PeekArgument();
@@ -53,6 +55,10 @@ public static class ContextEntityArgumentsExt
             return await ctx.Repository.GetSystemByAccount(id);
 
         // Finally, try HID parsing
+        input = input.ToLower().Replace("-", null);
+        if (!_shortIdRegex.IsMatch(input))
+            return null;
+
         var system = await ctx.Repository.GetSystemByHid(input);
         return system;
     }
@@ -83,7 +89,8 @@ public static class ContextEntityArgumentsExt
 
         // Finally (or if by-HID lookup is specified), check if input is a valid HID and then try member HID parsing:
 
-        if (!Regex.IsMatch(input, @"^[a-zA-Z]{5}$"))
+        input = input.ToLower().Replace("-", null);
+        if (!_shortIdRegex.IsMatch(input))
             return null;
 
         // For posterity:
@@ -148,6 +155,10 @@ public static class ContextEntityArgumentsExt
                 return byDisplayName;
         }
 
+        input = input.ToLower().Replace("-", null);
+        if (!_shortIdRegex.IsMatch(input))
+            return null;
+
         if (await ctx.Repository.GetGroupByHid(input, restrictToSystem) is { } byHid)
             return byHid;
 
@@ -167,14 +178,14 @@ public static class ContextEntityArgumentsExt
 
         if (isIDOnlyQuery)
         {
-            if (input.Length == 5)
+            if (input.Length == 5 || input.Length == 6)
                 return $"{entity} with ID \"{input}\" not found.";
-            return $"{entity} not found. Note that a {entity.ToLower()} ID is 5 characters long.";
+            return $"{entity} not found. Note that a {entity.ToLower()} ID is 5 or 6 characters long.";
         }
 
-        if (input.Length == 5)
+        if (input.Length == 5 || input.Length == 6)
             return $"{entity} with ID or name \"{input}\" not found.";
-        return $"{entity} with name \"{input}\" not found. Note that a {entity.ToLower()} ID is 5 characters long.";
+        return $"{entity} with name \"{input}\" not found. Note that a {entity.ToLower()} ID is 5 or 6 characters long.";
     }
 
     public static async Task<Channel> MatchChannel(this Context ctx)

@@ -34,7 +34,7 @@ public class MemberEdit
         if (existingMember != null && existingMember.Id != target.Id)
         {
             var msg =
-                $"{Emojis.Warn} You already have a member in your system with the name \"{existingMember.NameFor(ctx)}\" (`{existingMember.Hid}`). Do you want to rename this member to that name too?";
+                $"{Emojis.Warn} You already have a member in your system with the name \"{existingMember.NameFor(ctx)}\" (`{existingMember.DisplayHid(ctx.Config)}`). Do you want to rename this member to that name too?";
             if (!await ctx.PromptYesNo(msg, "Rename")) throw new PKError("Member renaming cancelled.");
         }
 
@@ -207,7 +207,7 @@ public class MemberEdit
                 var eb = new EmbedBuilder()
                     .Title($"{target.NameFor(ctx)}'s banner image")
                     .Image(new Embed.EmbedImage(target.BannerImage))
-                    .Description($"To clear, use `pk;member {target.Hid} banner clear`.");
+                    .Description($"To clear, use `pk;member {target.Reference(ctx)} banner clear`.");
                 await ctx.Reply(embed: eb.Build());
             }
             else
@@ -335,7 +335,7 @@ public class MemberEdit
         var eb = new EmbedBuilder()
             .Title("Member names")
             .Footer(new Embed.EmbedFooter(
-                $"Member ID: {target.Hid} | Active name in bold. Server name overrides display name, which overrides base name."
+                $"Member ID: {target.DisplayHid(ctx.Config)} | Active name in bold. Server name overrides display name, which overrides base name."
                 + (target.DisplayName != null && ctx.System?.Id == target.System ? $" Using {target.DisplayName.Length}/{Limits.MaxMemberNameLength} characters for the display name." : "")
                 + (memberGuildConfig?.DisplayName != null ? $" Using {memberGuildConfig?.DisplayName.Length}/{Limits.MaxMemberNameLength} characters for the server name." : "")));
 
@@ -677,8 +677,8 @@ public class MemberEdit
         ctx.CheckSystem().CheckOwnMember(target);
 
         await ctx.Reply(
-            $"{Emojis.Warn} Are you sure you want to delete \"{target.NameFor(ctx)}\"? If so, reply to this message with the member's ID (`{target.Hid}`). __***This cannot be undone!***__");
-        if (!await ctx.ConfirmWithReply(target.Hid)) throw Errors.MemberDeleteCancelled;
+            $"{Emojis.Warn} Are you sure you want to delete \"{target.NameFor(ctx)}\"? If so, reply to this message with the member's ID (`{target.Hid.Trim()}`). __***This cannot be undone!***__");
+        if (!await ctx.ConfirmWithReply(target.Hid.Trim())) throw Errors.MemberDeleteCancelled;
 
         await ctx.Repository.DeleteMember(target.Id);
 

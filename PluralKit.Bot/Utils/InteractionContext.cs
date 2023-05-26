@@ -16,10 +16,11 @@ public class InteractionContext
     private readonly ILifetimeScope _provider;
     private readonly IMetrics _metrics;
 
-    public InteractionContext(ILifetimeScope provider, InteractionCreateEvent evt, PKSystem system)
+    public InteractionContext(ILifetimeScope provider, InteractionCreateEvent evt, PKSystem system, SystemConfig config)
     {
         Event = evt;
         System = system;
+        Config = config;
         Cache = provider.Resolve<IDiscordCache>();
         Rest = provider.Resolve<DiscordApiClient>();
         Repository = provider.Resolve<ModelRepository>();
@@ -29,8 +30,10 @@ public class InteractionContext
 
     internal readonly IDiscordCache Cache;
     internal readonly DiscordApiClient Rest;
+
     internal readonly ModelRepository Repository;
     public readonly PKSystem System;
+    public readonly SystemConfig Config;
 
     public InteractionCreateEvent Event { get; }
 

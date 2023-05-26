@@ -535,12 +535,12 @@ public class SystemEdit
         ctx.CheckSystem().CheckOwnSystem(target);
 
         await ctx.Reply(
-            $"{Emojis.Warn} Are you sure you want to delete your system? If so, reply to this message with your system's ID (`{target.Hid}`).\n"
+            $"{Emojis.Warn} Are you sure you want to delete your system? If so, reply to this message with your system's ID (`{target.Hid.Trim()}`).\n"
                 + $"**Note: this action is permanent,** but you will get a copy of your system's data that can be re-imported into PluralKit at a later date sent to you in DMs."
                 + " If you don't want this to happen, use `pk;s delete -no-export` instead.");
-        if (!await ctx.ConfirmWithReply(target.Hid))
+        if (!await ctx.ConfirmWithReply(target.Hid.Trim()))
             throw new PKError(
-                $"System deletion cancelled. Note that you must reply with your system ID (`{target.Hid}`) *verbatim*.");
+                $"System deletion cancelled. Note that you must reply with your system ID (`{target.Hid.Trim()}`) *verbatim*.");
 
         // If the user confirms the deletion, export their system and send them the export file before actually
         // deleting their system, unless they specifically tell us not to do an export.

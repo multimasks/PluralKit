@@ -123,7 +123,7 @@ public partial class BulkImporter
             memberId = newMember.Id;
         }
 
-        _knownMemberIdentifiers[id] = memberId.Value;
+        _knownMemberIdentifiers[id.Trim()] = memberId.Value;
 
         await _repo.UpdateMember(memberId.Value, patch, _conn);
     }
@@ -164,7 +164,7 @@ public partial class BulkImporter
             groupId = newGroup.Id;
         }
 
-        _knownGroupIdentifiers[id] = groupId.Value;
+        _knownGroupIdentifiers[id.Trim()] = groupId.Value;
 
         await _repo.UpdateGroup(groupId.Value, patch, _conn);
 
@@ -179,7 +179,7 @@ public partial class BulkImporter
         {
             foreach (var memberIdentifier in groupMembers)
             {
-                if (!_knownMemberIdentifiers.TryGetValue(memberIdentifier.ToString(), out var memberId))
+                if (!_knownMemberIdentifiers.TryGetValue(memberIdentifier.ToString().Trim(), out var memberId))
                     throw new Exception(
                         $"Attempted to import group member with member identifier {memberIdentifier} but could not find a recently imported member with this id!");
 
@@ -260,7 +260,7 @@ public partial class BulkImporter
                 // We still assume timestamps are unique and non-duplicate, so:
                 foreach (var memberIdentifier in switchMembers)
                 {
-                    if (!_knownMemberIdentifiers.TryGetValue((string)memberIdentifier, out var memberId))
+                    if (!_knownMemberIdentifiers.TryGetValue(memberIdentifier.ToString().Trim(), out var memberId))
                         throw new Exception(
                             $"Attempted to import switch with member identifier {memberIdentifier} but could not find an entry in the id map for this! :/");
 

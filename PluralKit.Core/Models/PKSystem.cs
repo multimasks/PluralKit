@@ -62,7 +62,7 @@ public static class PKSystemExt
     public static JObject ToJson(this PKSystem system, LookupContext ctx)
     {
         var o = new JObject();
-        o.Add("id", system.Hid);
+        o.Add("id", system.Hid.Trim());
         o.Add("uuid", system.Uuid.ToString());
 
         o.Add("name", system.Name);

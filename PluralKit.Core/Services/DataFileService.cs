@@ -58,7 +58,7 @@ public class DataFileService
         {
             var s = new JObject();
             s.Add("timestamp", sw.TimespanStart.FormatExport());
-            s.Add("members", new JArray(sw.Members.Select(m => m.Hid)));
+            s.Add("members", new JArray(sw.Members.Select(m => m.Hid.Trim())));
             switches.Add(s);
         }
 

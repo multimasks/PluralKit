@@ -98,7 +98,7 @@ public class GroupControllerV2: PKControllerBase
 
         var system = await _repo.GetSystem(group.System);
 
-        return Ok(group.ToJson(ContextFor(group), system.Hid));
+        return Ok(group.ToJson(ContextFor(group), systemStr: system.Hid.Trim()));
     }
 
     [HttpGet("groups/{groupRef}/oembed.json")]

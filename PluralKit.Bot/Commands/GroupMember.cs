@@ -66,7 +66,7 @@ public class GroupMember
         if (groups.Count == 0)
             description = "This member has no groups.";
         else
-            description = string.Join("\n", groups.Select(g => $"[`{g.Hid}`] **{g.DisplayName ?? g.Name}**"));
+            description = string.Join("\n", groups.Select(g => $"[`{g.DisplayHid(ctx.Config)}`] **{g.DisplayName ?? g.Name}**"));
 
         if (pctx == LookupContext.ByOwner)
         {
@@ -130,11 +130,11 @@ public class GroupMember
         var opts = ctx.ParseListOptions(ctx.DirectLookupContextFor(target.System));
         opts.GroupFilter = target.Id;
 
-        var title = new StringBuilder($"Members of {target.DisplayName ?? target.Name} (`{target.Hid}`) in ");
+        var title = new StringBuilder($"Members of {target.DisplayName ?? target.Name} (`{target.DisplayHid(ctx.Config)}`) in ");
         if (targetSystem.Name != null)
-            title.Append($"{targetSystem.Name} (`{targetSystem.Hid}`)");
+            title.Append($"{targetSystem.Name} (`{targetSystem.DisplayHid(ctx.Config)}`)");
         else
-            title.Append($"`{targetSystem.Hid}`");
+            title.Append($"`{targetSystem.DisplayHid(ctx.Config)}`");
         if (opts.Search != null)
             title.Append($" matching **{opts.Search.Truncate(100)}**");
 

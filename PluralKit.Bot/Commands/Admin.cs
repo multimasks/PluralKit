@@ -30,18 +30,18 @@ public class Admin
             throw new PKError("Unknown system.");
 
         var newHid = ctx.PopArgument();
-        if (!Regex.IsMatch(newHid, "^[a-z]{5}$"))
+        if (!Regex.IsMatch(newHid, "^[a-z]{5,6}$"))
             throw new PKError($"Invalid new system ID `{newHid}`.");
 
         var existingSystem = await ctx.Repository.GetSystemByHid(newHid);
         if (existingSystem != null)
             throw new PKError($"Another system already exists with ID `{newHid}`.");
 
-        if (!await ctx.PromptYesNo($"Change system ID of `{target.Hid}` to `{newHid}`?", "Change"))
+        if (!await ctx.PromptYesNo($"Change system ID of `{target.Hid.Trim()}` to `{newHid}`?", "Change"))
             throw new PKError("ID change cancelled.");
 
         await ctx.Repository.UpdateSystem(target.Id, new SystemPatch { Hid = newHid });
-        await ctx.Reply($"{Emojis.Success} System ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} System ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task UpdateMemberId(Context ctx)
@@ -53,7 +53,7 @@ public class Admin
             throw new PKError("Unknown member.");
 
         var newHid = ctx.PopArgument();
-        if (!Regex.IsMatch(newHid, "^[a-z]{5}$"))
+        if (!Regex.IsMatch(newHid, "^[a-z]{5,6}$"))
             throw new PKError($"Invalid new member ID `{newHid}`.");
 
         var existingMember = await ctx.Repository.GetMemberByHid(newHid);
@@ -61,13 +61,13 @@ public class Admin
             throw new PKError($"Another member already exists with ID `{newHid}`.");
 
         if (!await ctx.PromptYesNo(
-            $"Change member ID of **{target.NameFor(LookupContext.ByNonOwner)}** (`{target.Hid}`) to `{newHid}`?",
+            $"Change member ID of **{target.NameFor(LookupContext.ByNonOwner)}** (`{target.Hid.Trim()}`) to `{newHid}`?",
             "Change"
         ))
             throw new PKError("ID change cancelled.");
 
         await ctx.Repository.UpdateMember(target.Id, new MemberPatch { Hid = newHid });
-        await ctx.Reply($"{Emojis.Success} Member ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} Member ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task UpdateGroupId(Context ctx)
@@ -79,20 +79,20 @@ public class Admin
             throw new PKError("Unknown group.");
 
         var newHid = ctx.PopArgument();
-        if (!Regex.IsMatch(newHid, "^[a-z]{5}$"))
+        if (!Regex.IsMatch(newHid, "^[a-z]{5,6}"))
             throw new PKError($"Invalid new group ID `{newHid}`.");
 
         var existingGroup = await ctx.Repository.GetGroupByHid(newHid);
         if (existingGroup != null)
             throw new PKError($"Another group already exists with ID `{newHid}`.");
 
-        if (!await ctx.PromptYesNo($"Change group ID of **{target.Name}** (`{target.Hid}`) to `{newHid}`?",
+        if (!await ctx.PromptYesNo($"Change group ID of **{target.Name}** (`{target.Hid.Trim()}`) to `{newHid}`?",
             "Change"
         ))
             throw new PKError("ID change cancelled.");
 
         await ctx.Repository.UpdateGroup(target.Id, new GroupPatch { Hid = newHid });
-        await ctx.Reply($"{Emojis.Success} Group ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} Group ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task RerollSystemId(Context ctx)
@@ -103,7 +103,7 @@ public class Admin
         if (target == null)
             throw new PKError("Unknown system.");
 
-        if (!await ctx.PromptYesNo($"Reroll system ID `{target.Hid}`?", "Reroll"))
+        if (!await ctx.PromptYesNo($"Reroll system ID `{target.Hid.Trim()}`?", "Reroll"))
             throw new PKError("ID change cancelled.");
 
         var query = new Query("systems").AsUpdate(new
@@ -113,7 +113,7 @@ public class Admin
         .Where("id", target.Id);
 
         var newHid = await ctx.Database.QueryFirst<string>(query, "returning hid");
-        await ctx.Reply($"{Emojis.Success} System ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} System ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task RerollMemberId(Context ctx)
@@ -125,7 +125,7 @@ public class Admin
             throw new PKError("Unknown member.");
 
         if (!await ctx.PromptYesNo(
-            $"Reroll member ID for **{target.NameFor(LookupContext.ByNonOwner)}** (`{target.Hid}`)?",
+            $"Reroll member ID for **{target.NameFor(LookupContext.ByNonOwner)}** (`{target.Hid.Trim()}`)?",
             "Reroll"
         ))
             throw new PKError("ID change cancelled.");
@@ -137,7 +137,7 @@ public class Admin
         .Where("id", target.Id);
 
         var newHid = await ctx.Database.QueryFirst<string>(query, "returning hid");
-        await ctx.Reply($"{Emojis.Success} Member ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} Member ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task RerollGroupId(Context ctx)
@@ -148,7 +148,7 @@ public class Admin
         if (target == null)
             throw new PKError("Unknown group.");
 
-        if (!await ctx.PromptYesNo($"Reroll group ID for **{target.Name}** (`{target.Hid}`)?",
+        if (!await ctx.PromptYesNo($"Reroll group ID for **{target.Name}** (`{target.Hid.Trim()}`)?",
             "Change"
         ))
             throw new PKError("ID change cancelled.");
@@ -160,7 +160,7 @@ public class Admin
         .Where("id", target.Id);
 
         var newHid = await ctx.Database.QueryFirst<string>(query, "returning hid");
-        await ctx.Reply($"{Emojis.Success} Group ID updated (`{target.Hid}` -> `{newHid}`).");
+        await ctx.Reply($"{Emojis.Success} Group ID updated (`{target.Hid.Trim()}` -> `{newHid}`).");
     }
 
     public async Task SystemMemberLimit(Context ctx)
@@ -244,7 +244,7 @@ public class Admin
 
         var system = await ctx.Repository.GetSystem(systemId.Value!);
 
-        if (!await ctx.PromptYesNo($"Associate account {account.NameAndMention()} with system `{system.Hid}`?", "Recover account"))
+        if (!await ctx.PromptYesNo($"Associate account {account.NameAndMention()} with system `{system.Hid.Trim()}`?", "Recover account"))
             throw new PKError("System recovery cancelled.");
 
         await ctx.Repository.AddAccount(system.Id, account.Id);
@@ -257,7 +257,7 @@ public class Admin
         await ctx.Reply(null, new Embed
         {
             Title = "System recovered",
-            Description = $"{account.NameAndMention()} has been linked to system `{system.Hid}`.",
+            Description = $"{account.NameAndMention()} has been linked to system `{system.Hid.Trim()}`.",
             Fields = new Embed.Field[]
             {
                 new Embed.Field("Token rerolled?", rerollToken ? "yes" : "no", true),

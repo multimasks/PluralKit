@@ -57,7 +57,7 @@ public partial class BulkImporter: IAsyncDisposable
         {
             system = await repo.CreateSystem(null, importer._conn);
             await repo.AddAccount(system.Id, userId, importer._conn);
-            importer._result.CreatedSystem = system.Hid;
+            importer._result.CreatedSystem = system.Hid.Trim();
             importer._system = system;
         }
 

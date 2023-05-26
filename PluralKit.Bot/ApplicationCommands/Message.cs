@@ -49,6 +49,7 @@ public class ApplicationCommandProxiedMessage
                 msg.Member,
                 guild,
                 LookupContext.ByNonOwner,
+                ctx.Config,
                 DateTimeZone.Utc
             ));
 

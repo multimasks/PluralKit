@@ -175,6 +175,8 @@ public class ReactionAdded: IEventHandler<MessageReactionAddEvent>
     private async ValueTask HandleQueryReaction(MessageReactionAddEvent evt, FullMessage msg)
     {
         var guild = await _cache.GetGuild(evt.GuildId!.Value);
+        var system = await _repo.GetSystemByAccount(evt.UserId);
+        var config = system != null ? await _repo.GetSystemConfig(system.Id) : null;
 
         // Try to DM the user info about the message
         try
@@ -189,6 +191,7 @@ public class ReactionAdded: IEventHandler<MessageReactionAddEvent>
                     msg.Member,
                     guild,
                     LookupContext.ByNonOwner,
+                    config,
                     DateTimeZone.Utc
                 ));
 

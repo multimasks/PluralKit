@@ -21,8 +21,27 @@ public static class ModelUtils
     public static string DisplayName(this PKMember member) =>
         member.DisplayName ?? member.Name;
 
-    public static string Reference(this PKMember member, Context ctx) => EntityReference(member.Hid, member.NameFor(ctx));
-    public static string Reference(this PKGroup group, Context ctx) => EntityReference(group.Hid, group.NameFor(ctx));
+    public static string Reference(this PKMember member, Context ctx) => EntityReference(member.DisplayHid(ctx.Config), member.NameFor(ctx));
+    public static string Reference(this PKGroup group, Context ctx) => EntityReference(group.DisplayHid(ctx.Config), group.NameFor(ctx));
+
+    public static string DisplayHid(this PKSystem system, SystemConfig? cfg = null) => HidTransform(system.Hid, cfg);
+    public static string DisplayHid(this PKMember member, SystemConfig? cfg = null) => HidTransform(member.Hid, cfg);
+    public static string DisplayHid(this PKGroup group, SystemConfig? cfg = null) => HidTransform(group.Hid, cfg);
+
+    private static string HidTransform(string hid, SystemConfig? cfg = null)
+    {
+        hid = hid.Trim();
+        if (cfg != null && cfg.HidDisplaySplitSix == true)
+        {
+            if (hid.Length > 5)
+            {
+                var len = (int)Math.Floor(hid.Length / 2.0);
+                hid = string.Concat(hid.AsSpan(0, len), "-", hid.AsSpan(len));
+            }
+        }
+
+        return hid;
+    }
 
     private static string EntityReference(string hid, string name)
     {

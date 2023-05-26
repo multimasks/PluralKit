@@ -51,7 +51,7 @@ public class Groups
         if (existingGroup != null)
         {
             var msg =
-                $"{Emojis.Warn} You already have a group in your system with the name \"{existingGroup.Name}\" (with ID `{existingGroup.Hid}`). Do you want to create another group with the same name?";
+                $"{Emojis.Warn} You already have a group in your system with the name \"{existingGroup.Name}\" (with ID `{existingGroup.DisplayHid(ctx.Config)}`). Do you want to create another group with the same name?";
             if (!await ctx.PromptYesNo(msg, "Create"))
                 throw new PKError("Group creation cancelled.");
         }
@@ -81,7 +81,7 @@ public class Groups
 
         var eb = new EmbedBuilder()
             .Description(
-                $"Your new group, **{groupName}**, has been created, with the group ID **`{newGroup.Hid}`**.\nBelow are a couple of useful commands:")
+                $"Your new group, **{groupName}**, has been created, with the group ID **`{newGroup.DisplayHid(ctx.Config)}`**.\nBelow are a couple of useful commands:")
             .Field(new Embed.Field("View the group card", $"> pk;group **{reference}**"))
             .Field(new Embed.Field("Add members to the group",
                 $"> pk;group **{reference}** add **MemberName**\n> pk;group **{reference}** add **Member1** **Member2** **Member3** (and so on...)"))
@@ -111,7 +111,7 @@ public class Groups
         if (existingGroup != null && existingGroup.Id != target.Id)
         {
             var msg =
-                $"{Emojis.Warn} You already have a group in your system with the name \"{existingGroup.Name}\" (with ID `{existingGroup.Hid}`). Do you want to rename this group to that name too?";
+                $"{Emojis.Warn} You already have a group in your system with the name \"{existingGroup.Name}\" (with ID `{existingGroup.DisplayHid(ctx.Config)}`). Do you want to rename this group to that name too?";
             if (!await ctx.PromptYesNo(msg, "Rename"))
                 throw new PKError("Group rename cancelled.");
         }
@@ -444,20 +444,20 @@ public class Groups
         await ctx.RenderGroupList(
             ctx.LookupContextFor(system.Id),
             system.Id,
-            GetEmbedTitle(system, opts),
+            GetEmbedTitle(ctx, system, opts),
             system.Color,
             opts
         );
     }
 
-    private string GetEmbedTitle(PKSystem target, ListOptions opts)
+    private string GetEmbedTitle(Context ctx, PKSystem target, ListOptions opts)
     {
         var title = new StringBuilder("Groups of ");
 
         if (target.Name != null)
-            title.Append($"{target.Name} (`{target.Hid}`)");
+            title.Append($"{target.Name} (`{target.DisplayHid(ctx.Config)}`)");
         else
-            title.Append($"`{target.Hid}`");
+            title.Append($"`{target.DisplayHid(ctx.Config)}`");
 
         if (opts.Search != null)
             title.Append($" matching **{opts.Search}**");
@@ -568,10 +568,10 @@ public class Groups
         ctx.CheckOwnGroup(target);
 
         await ctx.Reply(
-            $"{Emojis.Warn} Are you sure you want to delete this group? If so, reply to this message with the group's ID (`{target.Hid}`).\n**Note: this action is permanent.**");
-        if (!await ctx.ConfirmWithReply(target.Hid))
+            $"{Emojis.Warn} Are you sure you want to delete this group? If so, reply to this message with the group's ID (`{target.Hid.Trim()}`).\n**Note: this action is permanent.**");
+        if (!await ctx.ConfirmWithReply(target.Hid.Trim()))
             throw new PKError(
-                $"Group deletion cancelled. Note that you must reply with your group ID (`{target.Hid}`) *verbatim*.");
+                $"Group deletion cancelled. Note that you must reply with your group ID (`{target.Hid.Trim()}`) *verbatim*.");
 
         await ctx.Repository.DeleteGroup(target.Id);
 
@@ -580,7 +580,7 @@ public class Groups
 
     public async Task DisplayId(Context ctx, PKGroup target)
     {
-        await ctx.Reply(target.Hid);
+        await ctx.Reply(target.DisplayHid(ctx.Config));
     }
 
     private async Task<PKSystem> GetGroupSystem(Context ctx, PKGroup target)

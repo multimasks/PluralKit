@@ -9,7 +9,7 @@ namespace PluralKit.API;
 public class PKControllerBase: ControllerBase
 {
     private readonly Guid _requestId = Guid.NewGuid();
-    private readonly Regex _shortIdRegex = new("^[a-z]{5}$");
+    private readonly Regex _shortIdRegex = new("^[a-z]{5,6}$");
     private readonly Regex _snowflakeRegex = new("^[0-9]{17,19}$");
 
     private List<PKMember>? _memberLookupCache { get; set; }
@@ -65,7 +65,7 @@ public class PKControllerBase: ControllerBase
                 _memberLookupCache = await _repo.GetSystemMembers((SystemId)systemId).ToListAsync();
             }
 
-            return _memberLookupCache.FirstOrDefault(x => x.Hid == memberRef || x.Uuid.ToString() == memberRef);
+            return _memberLookupCache.FirstOrDefault(x => x.Hid.Trim() == memberRef || x.Uuid.ToString() == memberRef);
         }
 
         if (Guid.TryParse(memberRef, out var guid))
@@ -90,7 +90,7 @@ public class PKControllerBase: ControllerBase
                 _groupLookupCache = await _repo.GetSystemGroups((SystemId)systemId).ToListAsync();
             }
 
-            return _groupLookupCache.FirstOrDefault(x => x.Hid == groupRef || x.Uuid.ToString() == groupRef);
+            return _groupLookupCache.FirstOrDefault(x => x.Hid.Trim() == groupRef || x.Uuid.ToString() == groupRef);
         }
 
         if (Guid.TryParse(groupRef, out var guid))

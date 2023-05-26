@@ -21,20 +21,20 @@ public class SystemList
         await ctx.RenderMemberList(
             ctx.LookupContextFor(target.Id),
             target.Id,
-            GetEmbedTitle(target, opts),
+            GetEmbedTitle(ctx, target, opts),
             target.Color,
             opts
         );
     }
 
-    private string GetEmbedTitle(PKSystem target, ListOptions opts)
+    private string GetEmbedTitle(Context ctx, PKSystem target, ListOptions opts)
     {
         var title = new StringBuilder("Members of ");
 
         if (target.Name != null)
-            title.Append($"{target.Name} (`{target.Hid}`)");
+            title.Append($"{target.Name} (`{target.DisplayHid(ctx.Config)}`)");
         else
-            title.Append($"`{target.Hid}`");
+            title.Append($"`{target.DisplayHid(ctx.Config)}`");
 
         if (opts.Search != null)
             title.Append($" matching **{opts.Search.Truncate(100)}**");

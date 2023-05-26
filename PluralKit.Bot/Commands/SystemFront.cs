@@ -39,8 +39,8 @@ public class SystemFront
                 (lastEntry, newSwitch) => new FrontHistoryEntry(lastEntry.ThisSwitch?.Timestamp, newSwitch));
 
         var embedTitle = system.Name != null
-            ? $"Front history of {system.Name} (`{system.Hid}`)"
-            : $"Front history of `{system.Hid}`";
+            ? $"Front history of {system.Name} (`{system.DisplayHid(ctx.Config)}`)"
+            : $"Front history of `{system.DisplayHid(ctx.Config)}`";
 
         var showMemberId = ctx.MatchFlag("with-id", "wid");
 
@@ -63,7 +63,7 @@ public class SystemFront
 
                     var members = await ctx.Database.Execute(c => ctx.Repository.GetSwitchMembers(c, sw.Id)).ToListAsync();
                     var membersStr = members.Any()
-                        ? string.Join(", ", members.Select(m => $"**{m.NameFor(ctx)}**{(showMemberId ? $" (`{m.Hid}`)" : "")}"))
+                        ? string.Join(", ", members.Select(m => $"**{m.NameFor(ctx)}**{(showMemberId ? $" (`{m.DisplayHid(ctx.Config)}`)" : "")}"))
                         : "**no fronter**";
 
                     var switchSince = SystemClock.Instance.GetCurrentInstant() - sw.Timestamp;
@@ -122,11 +122,11 @@ public class SystemFront
 
         var title = new StringBuilder("Frontpercent of ");
         if (group != null)
-            title.Append($"{group.NameFor(ctx)} (`{group.Hid}`)");
+            title.Append($"{group.NameFor(ctx)} (`{group.DisplayHid(ctx.Config)}`)");
         else if (system.Name != null)
-            title.Append($"{system.Name} (`{system.Hid}`)");
+            title.Append($"{system.Name} (`{system.DisplayHid(ctx.Config)}`)");
         else
-            title.Append($"`{system.Hid}`");
+            title.Append($"`{system.DisplayHid(ctx.Config)}`");
 
         var frontpercent = await ctx.Database.Execute(c => ctx.Repository.GetFrontBreakdown(c, system.Id, group?.Id, rangeStart.Value.ToInstant(), now));
         await ctx.Reply(embed: await _embeds.CreateFrontPercentEmbed(frontpercent, system, group, ctx.Zone,

@@ -69,7 +69,11 @@ No. This is a limitation in Discord itself, and cannot be changed. The color com
 
 ### Why can't I use nitro emoji in some channels?
 Webhooks inherit nitro emoji permissions from the `@everyone` role, so `@everyone` must have the "Use External Emoji" permission to be able to use nitro emoji with PluralKit.
-If it still doesn't work, make sure this permission isn't denied in channel overrides (found in channel settings -> permissions).
+If it still doesn't work, make sure this permission isn't denied in channel overrides (found in channel settings -> permissions). You can also use `pk;debug permissions` to double check if it is actually a permissions issue.
+
+PluralKit must be in the server the emojis are from. This is because of a change made by Discord in 2022.
+
+Because PluralKit cannot be a Twitch subscriber, it will never be able to use emojis from Twitch integrations.
 
 ### Why can't I invite PluralKit to my server?
 
